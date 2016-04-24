@@ -1,0 +1,35 @@
+<html>
+<head>
+    <script src="js/World.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.3.min.js"></script>
+    <style>
+    .cell{
+      float:left;
+      width:2px;
+			height:2px;
+
+			text-align:center;
+		}
+    .neutral {
+      background-color:grey;
+
+    }
+    .red {
+      background-color:red;
+    }
+    .row{
+      clear:both;
+
+    }
+    </style>
+</head>
+<body>
+    <div id="gameScreen"></div>
+    <script>
+        game = new Game(300, 300);
+        function randomNumber(a, b){
+          return Math.floor((Math.random() * b) + a);
+        }
+    </script>
+</body>
+</html>
