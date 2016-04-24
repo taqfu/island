@@ -5,6 +5,7 @@ function Game(sizeOfX, sizeOfY){
     this.map = new Array(new Array());
 
     this.direction = checkDirection;
+    this.fartherRange = increaseDistance;
     this.open = openLocations;
     this.random = randomLocation;
     this.show = showWorld;
@@ -18,7 +19,7 @@ function Game(sizeOfX, sizeOfY){
     }
     var numOfIslandSquares=0;
     //var randNum =
-    var maxNumOfIslandSquares = randomNumber(1800, 86400);
+    var maxNumOfIslandSquares = 1000; //randomNumber(1800, 86400);
     var seed = {x:this.sizeOfX/2, y:this.sizeOfY/2};
     this.map[seed["x"]][seed["y"]]=1;
     var seedDistance=1;
@@ -29,52 +30,37 @@ function Game(sizeOfX, sizeOfY){
 
     while (numOfIslandSquares<maxNumOfIslandSquares){
         console.log ("START", numOfIslandSquares, maxNumOfIslandSquares);
-        randomDirection = randomNumber(1,8);
-        openNeighbors = this.open(position);
+        openNeighbors = this.open(position, seedDistance);
+        console.log("Open neighbors found: ", openNeighbors.length, position, seedDistance);
+
         randomNeighbor = randomNumber(1, openNeighbors.length)-1;
+        console.log("Random neighbor chosen: ", randomNeighbor);
 
         nextPosition = openNeighbors[randomNeighbor];
-        console.log("seed", seed, seedDistance);
+        //console.log("seed", seed, seedDistance);
         seedStatus = this.status(seed, seedDistance);
-        console.log(nextPosition, openNeighbors, openNeighbors.length, randomNeighbor)
         console.log("position - map ", this.map[nextPosition["x"]][nextPosition["y"]], "POS", nextPosition, "/", openNeighbors, randomNeighbor);
-        positionStatus = this.status(nextPosition, 1);
-        console.log(positionStatus, seedStatus);
+        positionStatus = this.status(nextPosition, seedDistance);
+        console.log("status", positionStatus[0], seedStatus[0]);
 
         if (positionStatus[0]>0 && nextPosition && this.map[nextPosition["x"]][nextPosition["y"]]===0){
             console.log("if 1");
             this.map[nextPosition["x"]][nextPosition["y"]]=1;
             position = nextPosition;
             numOfIslandSquares++;
-        } else if (positionStatus[0]===0 && seedStatus[0]>0){
-            console.log("if 2");
-            if (this.map[nextPosition["x"]][nextPosition["y"]]===0){
-                this.map[nextPosition["x"]][nextPosition["y"]]=1;
-            }
-            position=seed;
-            if (positionStatus[0]===0 && seedStatus[0]==0){
-                console.log(seedDistance);
-                seedDistance++;
-                console.log(seedDistance);
-            }
-            console.log(positionStatus, seedStatus);
-
-
-        } else if (positionStatus[0]===0 && seedStatus[0]==0){
-          console.log("if 3");
-          var searchingForNewPosition=0;
-          while (searchingForNewPosition){
-              position={x: seed["x"]+(randomNumber(1, seedDistance)-1), y: seed["y"]+(randomNumber(1, seedDistance)-1)};
-              newPositionStatus = this.status(position);
-              if (newPositionStatus[0]>0){
-                  searchingForNewPosition=0;
-              }
-              searchingForNewPosition++;
-          }
-
-          seedDistance++;
+        } else if (positionStatus[0]===0 && seedStatus[0]===0){
+            this.fartherRange();
+            console.log("if 2 - new seedDistance:", seedDistance);
+        } else if ((positionStatus[0]===0 && seedStatus[0]===1)  && this.map[nextPosition["x"]][nextPosition["y"]]===0){
+            this.map[nextPosition["x"]][nextPosition["y"]]=1;
+            this.fartherRange();
+            console.log("if 3 - new seedDistance:", seedDistance);
+        } else {
+            console.log("else");
+            position = seed;
         }
         console.log ("END", numOfIslandSquares, maxNumOfIslandSquares);
+        console.log();
     }
     console.log(numOfIslandSquares, maxNumOfIslandSquares);
     $("#gameScreen").html(this.show());
@@ -120,6 +106,17 @@ function checkDirection(location, direction, units){
 	return {x:x, y:y};
 }
 
+function increaseDistance(){
+  var increasingDistance = true;
+  while (increasingDistance){
+    this.seedDistance++;
+    seedStatus = this.status(this.seed, this.seedDistance);
+    if (seedStatus[0]>0){
+        increasingDistance=false;
+    }
+  }
+}
+
 function locationStatus(location, distance){
     var status = new Array();
     var locationToBeChecked;
@@ -142,10 +139,10 @@ function randomLocation (){
     return {x:randX, y:randY};
 }
 
-function openLocations(location){
+function openLocations(location, distance){
     var openLocations = new Array();
     for(directionNum=1; directionNum<this.directions.length;directionNum++){
-        locationToBeChecked = this.direction(location, this.directions[directionNum],1);
+        locationToBeChecked = this.direction(location, this.directions[directionNum], distance);
 
         if (locationToBeChecked!==false && this.map[locationToBeChecked["x"]][locationToBeChecked["y"]]===0){
           openLocations.push(locationToBeChecked);
