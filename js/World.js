@@ -4,7 +4,7 @@ function Game(sizeOfX, sizeOfY){
     this.numOfIslandSquares=0;
     this.distanceFromShore = 10;
 
-    this.maxNumOfIslandSquares = randomNumber(1000, 43200);
+    this.maxNumOfIslandSquares = 8000; //randomNumber(1000, 43200);
     this.sizeOfX = sizeOfX;
     this.sizeOfY = sizeOfY;
     this.map = new Array(new Array());
@@ -106,8 +106,9 @@ function closestWaterSeed(location, waterSeeds){
 }
 function connectWater(waterSeeds){
     for(var seedNum=0;seedNum<waterSeeds.length;seedNum++){
-        console.log("CONNECTING WATER", seedNum);
-        sortSeedsByDistance(waterSeeds[seedNum], waterSeeds);
+        //console.log("CONNECTING WATER", seedNum);
+        seedsByDistance = sortSeedsByDistance(waterSeeds[seedNum], waterSeeds);
+        //console.log(seedNum, seedsByDistance)
     }
 }
 
@@ -123,8 +124,28 @@ function sortSeedsByDistance(location, waterSeeds){
         } else if (location===waterSeeds[seedNum]){
             seedDistances.push("SELF");
         }
+        sortedSeedDistances.push(null);
     }
-    console.log(seedDistances);
+    var maxDistance = 0;
+    var lastDistance = 0;
+    for (var numOfWaterSeeds=0;numOfWaterSeeds<sortedSeedDistances.length-1;numOfWaterSeeds++){
+        var minDistance = 1000*1000;
+
+
+        for(var seedNum=0;seedNum<seedDistances.length;seedNum++){
+            if ((seedDistances[seedNum]>=lastDistance && seedDistances[seedNum]<minDistance) && sortedSeedDistances.indexOf(seedNum)===-1){
+                minDistance = seedDistances[seedNum];
+                currentNumber = seedNum;
+
+            }
+            if (seedDistances[seedNum]>maxDistance){
+                maxDistance = seedDistances[seedNum];
+            }
+        }
+        sortedSeedDistances[numOfWaterSeeds]=currentNumber;
+        lastDistance=minDistance;
+    }
+    return sortedSeedDistances;
 }
 function fillEast(fromX, toX, y){
     for(var x=fromX;x<toX;x++){
